@@ -1,0 +1,24 @@
+{
+    "name": "online_school_system_backend",
+    "version": "1.0.0",
+    "description": "张艺斌校园在线求助平台后端",
+    "main": "index.js",
+    "scripts": {
+        "test": "nodemon ./src/routes/index.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/cors": "^2.8.9",
+        "@types/express": "^4.17.10",
+        "@types/lodash": "^4.14.168",
+        "@types/moment": "^2.13.0",
+        "@types/mysql": "^2.15.17",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "lodash": "^4.17.20",
+        "moment": "^2.29.1",
+        "mysql": "^2.18.1",
+        "socket.io": "^3.1.0"
+    }
+}
