@@ -3,6 +3,8 @@ import IUser from '../ts/interface/IUser';
 import IHelpINfo from '../ts/interface/IHelpInfo';
 import moment from 'moment';
 import IComments from '../ts/interface/IComments';
+import IAddress from '../ts/interface/IAddress';
+import IUsers from '../ts/interface/IUsers';
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 
 //  用户登录
@@ -15,6 +17,60 @@ async function login(params: IUser): Promise<Array<IUser>> {
                 reject(error);
             } else {
                 resolve(result);
+            }
+        });
+    });
+}
+//  注册
+async function registrer(params: any) {
+    const { account, username, password, phonenumber, role, address } = params;
+    return new Promise((resolve, reject) => {
+        const sql = `insert into user (account,username,password,phonenumber,role,address,balance,locked) values (${account},'${username}','${password}',${phonenumber},'${role}','${address}',500,'正常')`;
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
+//  获取地址
+async function getAddress(): Promise<Array<IAddress>> {
+    return new Promise((resolve, reject) => {
+        const sql = 'select * from addressTable';
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
+//  管理员获取人员信息(除 管理员外)
+async function getUsers(): Promise<Array<IUsers>> {
+    return new Promise((resolve, reject) => {
+        const sql = `select * from user where role != 'admin' `;
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
+//  管理员操作用户登录权限
+async function updateUserStatus(params: IUsers) {
+    const { account, locked } = params;
+    return new Promise((resolve, reject) => {
+        const sql = `update user set locked='${locked}' where account=${account}`;
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(true);
             }
         });
     });
@@ -199,6 +255,10 @@ async function addMessages(params: IComments) {
 }
 export {
     login,
+    registrer,
+    getAddress,
+    getUsers,
+    updateUserStatus,
     getHelpInfo,
     handleHelpInfo,
     approveHelpInfo,

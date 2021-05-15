@@ -15,6 +15,8 @@ const io = new Server(server);
 
 import {
     login,
+    registrer,
+    getAddress,
     getHelpInfo,
     handleHelpInfo,
     approveHelpInfo,
@@ -27,6 +29,8 @@ import {
     getComments,
     getMessages,
     addMessages,
+    getUsers,
+    updateUserStatus,
 } from '../service/index';
 
 interface userMsg {
@@ -55,6 +59,48 @@ app.post('/login', async (req, res) => {
         res.send({
             error: 1001,
             msg: '登陆失败',
+        });
+    }
+});
+//  注册
+app.post('/register', async (req, res) => {
+    const result = await registrer(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
+        });
+    }
+});
+//  获取地址信息
+app.get('/getAddress', async (req, res) => {
+    const result = await getAddress();
+    if (result.length > 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: result,
+        });
+    }
+});
+//  管理员获取人员信息(除 管理员外)
+app.get('/getUsers', async (req, res) => {
+    const result = await getUsers();
+    if (result.length > 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: result,
+        });
+    }
+});
+//  管理员操作用户登录权限
+app.post('/updateUserStatus', async (req, res) => {
+    const result = await updateUserStatus(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
         });
     }
 });
