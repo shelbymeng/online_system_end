@@ -21,6 +21,8 @@ import {
     handleHelpInfo,
     approveHelpInfo,
     finishHelpOrder,
+    getUserInfo,
+    updateUserInfo,
     getStudentHelpOrder,
     getStudentApproveOrder,
     cancelOrder,
@@ -31,7 +33,16 @@ import {
     addMessages,
     getUsers,
     updateUserStatus,
+    getOrderType,
+    getAllOrders,
+    setOrderType,
+    deleteOrderType,
+    getAbnormalOrders,
+    lockOrder,
+    userAppealOrder,
+    dealAppealOrder,
 } from '../service/index';
+import calculateExtra from '../service/calculateExtra';
 
 interface userMsg {
     user: string;
@@ -104,6 +115,28 @@ app.post('/updateUserStatus', async (req, res) => {
         });
     }
 });
+//  获取订单类型
+app.get('/getOrderType', async (req, res) => {
+    const result = await getOrderType();
+    if (result.length > 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: result,
+        });
+    }
+});
+//  管理员获取全部订单
+app.get('/getAllOrders', async (req, res) => {
+    const orders = await getAllOrders();
+    if (orders.length > 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: orders,
+        });
+    }
+});
 //  获取全部未接单信息
 app.post('/getHelpInfo', async (req, res) => {
     const helpInfo = await getHelpInfo(req.body.account);
@@ -152,7 +185,7 @@ app.post('/approveHelpInfo', async (req, res) => {
 });
 //  学生完成接单任务
 app.post('/finishHelpOrder', async (req, res) => {
-    const result = await finishHelpOrder(req.body);
+    const result = await calculateExtra(req.body);
     if (result) {
         res.send({
             error: 0,
@@ -162,6 +195,27 @@ app.post('/finishHelpOrder', async (req, res) => {
         res.send({
             error: 5001,
             msg: '完成订单失败',
+        });
+    }
+});
+//  学生获取个人信息
+app.post('/getUserInfo', async (req, res) => {
+    const user = await getUserInfo(req.body);
+    if (user) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: user,
+        });
+    }
+});
+//  学生修改个人信息
+app.post('/updateUserInfo', async (req, res) => {
+    const result = await updateUserInfo(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
         });
     }
 });
@@ -287,6 +341,68 @@ app.post('/addMessages', async (req, res) => {
         res.send({
             error: 9995,
             msg: '提交失败',
+        });
+    }
+});
+//  管理员功能
+//  添加订单种类
+app.post('/setOrderType', async (req, res) => {
+    const result = await setOrderType(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
+        });
+    }
+});
+//  删除订单种类
+app.post('/deleteOrderType', async (req, res) => {
+    const result = await deleteOrderType(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
+        });
+    }
+});
+//  获取申诉订单
+app.get('/getAppealOrders', async (req, res) => {
+    const result = await getAbnormalOrders();
+    if (result.length > 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: result,
+        });
+    }
+});
+//  冻结订单
+app.post('/lockOrder', async (req, res) => {
+    let result = await lockOrder(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
+        });
+    }
+});
+//  学生申诉订单
+app.post('/userAppealOrder', async (req, res) => {
+    const result = await userAppealOrder(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
+        });
+    }
+});
+//  解决申诉订单
+app.post('/dealAppealOrder', async (req, res) => {
+    const result = await dealAppealOrder(req.body);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
         });
     }
 });
