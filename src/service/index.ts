@@ -408,6 +408,22 @@ async function dealAppealOrder(params: IHelpInfo) {
         });
     });
 }
+interface IUserChat {
+    account: number;
+    username: string;
+}
+async function getUserChat(account: number): Promise<Array<IUserChat>> {
+    return new Promise((resolve, reject) => {
+        const sql = `select account,username from user where account != ${account} and locked != '冻结'`;
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
 export {
     login,
     registrer,
@@ -437,4 +453,5 @@ export {
     userAppealOrder,
     dealAppealOrder,
     calculate,
+    getUserChat,
 };

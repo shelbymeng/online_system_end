@@ -1,17 +1,21 @@
 import express from 'express';
-import http from 'http';
 const app = express();
-const server = http.createServer(app);
-import { Server, Socket } from 'socket.io';
-import _ from 'lodash';
-// const http = require('http').Server(app);
-// const io = require('socket.io')(http);
+import http from 'http';
 import cors from 'cors';
 app.use(cors());
-// io.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const io = new Server(server);
+const server = http.createServer(app);
+import { Server, Socket } from 'socket.io';
+// const http = require('http').Server(app);
+// const io = require('socket.io')(http);
+import _ from 'lodash';
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+});
 
 import {
     login,
@@ -41,22 +45,10 @@ import {
     lockOrder,
     userAppealOrder,
     dealAppealOrder,
+    getUserChat,
 } from '../service/index';
 import calculateExtra from '../service/calculateExtra';
 
-interface userMsg {
-    user: string;
-    msg: string;
-    date: string;
-}
-interface user {
-    account: number;
-    id: string;
-}
-const userLists: Array<user> = [];
-
-const userArr: user[] = [];
-const msg: userMsg[] = [];
 //  登录
 app.post('/login', async (req, res) => {
     const loginRes = await login(req.body);
@@ -149,7 +141,7 @@ app.post('/getHelpInfo', async (req, res) => {
     } else {
         res.send({
             error: 2001,
-            msg: '获取接单信息失败',
+            msg: '数据为空',
         });
     }
 });
@@ -406,49 +398,47 @@ app.post('/dealAppealOrder', async (req, res) => {
         });
     }
 });
-//  在线聊天
-// io.on('connection', (socket: Socket) => {
-//     // socket.join('room');
-//     console.log('后端刷新-------');
-//     console.log(socket.id);
-//     //  用户login
-//     socket.on('login', (content: user) => {
-//         console.log(`ML ~ file: index.ts ~ line 47 ~ socket.on ~ content`, content);
-//         const { account, id } = content;
-//         if (userArr.length !== 0) {
-//             for (let user of userArr) {
-//                 if (user.account !== account) {
-//                     userArr.push(content);
-//                 } else if (user.account === account && user.id !== id) {
-//                     _.set(user, 'id', id);
-//                 }
-//             }
-//         } else {
-//             userArr.push(content);
-//         }
-//         console.log(`ML ~ file: index.ts ~ line 59 ~ login`, userArr);
-//     });
-//     //  接收用户发送消息
-//     socket.on('send', (content: userMsg) => {
-//         console.log('监听前端发送数据');
-//         msg.push(content);
-//         socket.emit('msgfromServer', msg);
-//         socket.to('room').emit('msgfromServer', msg);
-//         socket.to('room').broadcast.emit('msgfromServer', msg);
-//     });
-//     //  获取在线用户
-//     socket.on('handleOnlineUsers', (account: string) => {
-//         socket.emit('getOnlineUsers', userArr);
-//     });
-// });
-// function getId(account: number) {
-//     return userArr.filter((item) => item.account === account);
-// }
-const app_port = 3000;
-// const io_socket = 4000;
-app.listen(app_port, () => {
-    console.log(`ML ~ file: index.ts ~ line 42 ~ app.listen ~ app_port`, app_port);
+app.post('/getuserChat', async (req, res) => {
+    const result = await getUserChat(req.body.account);
+    if (result.length !== 0) {
+        res.send({
+            error: 0,
+            msg: 'success',
+            data: result,
+        });
+    } else {
+        res.send({
+            error: 9988,
+            msg: '暂无人员信息',
+        });
+    }
 });
-// server.listen(io_socket, () => {
-//     console.log(`ML ~ file: index.ts ~ line 45 ~ server.listen ~ io_socket`, io_socket);
-// });
+interface userMsg {
+    user: number;
+    msg: string;
+    date: string;
+    receiver: number;
+}
+interface user {
+    account: number;
+    username: string;
+}
+
+const userArr: user[] = [];
+const msg: userMsg[] = [];
+//  在线聊天
+io.on('connection', (socket: Socket) => {
+    console.log('后端刷新-------');
+    console.log(socket.id);
+
+    socket.on(`send`, (value: userMsg) => {
+        console.log(`ML ~ file: index.ts ~ line 451 ~ io.on ~ value`, value);
+        const { user, receiver } = value;
+        msg.push(value);
+        io.emit(`receive`, msg);
+    });
+});
+
+server.listen(3000, () => {
+    console.log(`ML ~ file: index.ts ~ line 45 ~ server.listen ~ io_socket 连接成功`);
+});
