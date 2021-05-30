@@ -35,6 +35,7 @@ import {
     getComments,
     getMessages,
     addMessages,
+    deleteComment,
     getUsers,
     updateUserStatus,
     getOrderType,
@@ -333,6 +334,16 @@ app.post('/addMessages', async (req, res) => {
         res.send({
             error: 9995,
             msg: '提交失败',
+        });
+    }
+});
+//  管理员删除留言
+app.post('/deleteComment', async (req, res) => {
+    const result = await deleteComment(req.body.commentId);
+    if (result) {
+        res.send({
+            error: 0,
+            msg: 'success',
         });
     }
 });

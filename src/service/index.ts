@@ -323,7 +323,19 @@ async function addMessages(params: IComments) {
         });
     });
 }
-
+//  管理员删除留言
+async function deleteComment(commentId: string) {
+    return new Promise((resolve, reject) => {
+        const sql = `delete from commentsTable where commentId='${commentId}'`;
+        connection.query(sql, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
 //  管理员功能
 //  配置订单种类
 async function setOrderType(params: IOrderType) {
@@ -446,6 +458,7 @@ export {
     getComments,
     addMessages,
     getMessages,
+    deleteComment,
     setOrderType,
     deleteOrderType,
     getAbnormalOrders,
